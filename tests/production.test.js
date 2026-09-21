@@ -12,6 +12,7 @@ test("production permissions and moderation protect public and private data", as
       "setup.sql",
       "migrations/202609190003_top.sql",
       "migrations/202609190004_production.sql",
+      "migrations/202609210005_listing_contact.sql",
     ])
       await db.exec(
         (
@@ -60,10 +61,24 @@ test("production permissions and moderation protect public and private data", as
     );
     const p = (
       await db.query(
-        "insert into public.properties(realtor_id,title,description,listing_type,property_type,price,city,bedrooms,bathrooms,area,status) values($1,'Test property','A valid description','sale','House',1,'Yerevan',1,1,30,'published') returning id",
+        "insert into public.properties(realtor_id,title,description,listing_type,property_type,price,city,bedrooms,bathrooms,area,status,contact_phone) values($1,'Test property','A valid description','sale','House',1,'Yerevan',1,1,30,'published','+37491123456') returning id",
         [a],
       )
     ).rows[0].id;
+    await assert.rejects(
+      db.query("update public.properties set contact_phone='' where id=$1", [
+        p,
+      ]),
+    );
+    assert.equal(
+      (
+        await db.query(
+          "select contact_phone from public.market_properties where id=$1",
+          [p],
+        )
+      ).rows[0].contact_phone,
+      "+37491123456",
+    );
     await assert.rejects(
       db.query(
         "update public.properties set moderation_status='blocked' where id=$1",

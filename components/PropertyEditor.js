@@ -45,7 +45,11 @@ export default function PropertyEditor({ id }) {
   const { properties, clients, save, demo, user, profile } = useCrm(),
     router = useRouter();
   const existing = properties.find((p) => p.id === id);
-  const [value, setValue] = useState({ ...defaults, ...existing }),
+  const [value, setValue] = useState({
+      ...defaults,
+      contact_phone: profile?.phone || "",
+      ...existing,
+    }),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
   if (id && !existing)
@@ -196,6 +200,21 @@ export default function PropertyEditor({ id }) {
       <form onSubmit={submit} className="panel editor">
         <h2>{tr("The essentials")}</h2>
         {tr(field("title", "Property title"))}
+        <label className="wide">
+          {tr("Listing contact phone")}
+          <input
+            type="tel"
+            autoComplete="tel"
+            maxLength={30}
+            placeholder="+374 91 123456"
+            required={value.status === "published"}
+            value={value.contact_phone || ""}
+            onChange={(e) => update("contact_phone", e.target.value)}
+          />
+          <small>
+            {tr("This number is public on this listing. Required to publish.")}
+          </small>
+        </label>
         {tr(
           field("status", "Listing status", "text", [
             "draft",

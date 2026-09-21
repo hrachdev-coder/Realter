@@ -1,3 +1,4 @@
+import { phoneHref } from "@/lib/phone";
 import SaveProperty from "@/components/SaveProperty";
 import RecordView from "@/components/RecordView";
 import ReportProperty from "@/components/ReportProperty";
@@ -11,17 +12,23 @@ import Gallery from "@/components/Gallery";
 import PropertyCard from "@/components/PropertyCard";
 import { money } from "@/lib/i18n";
 import InquiryForm from "@/components/InquiryForm";
-import { publicProperties, publicProperty, realtor } from "@/lib/data";
+import { relatedProperties, publicProperty, realtor } from "@/lib/data";
 import { configured } from "@/lib/config";
 export const dynamic = "force-dynamic";
 export default async function Page({ params }) {
   const { t: tr, locale } = await getLocale();
 
   const { id } = await params;
-  const properties = await publicProperties();
   const p = await publicProperty(id);
   if (!p) notFound();
-  const agent = await realtor(p.realtor_id);
+  const [agent, related] = await Promise.all([
+    realtor(p.realtor_id),
+    relatedProperties(p),
+  ]);
+  const contactPhone = phoneHref(p.contact_phone)
+    ? p.contact_phone
+    : agent?.phone;
+  const telephone = phoneHref(contactPhone);
   return (
     <>
       <Header />
@@ -29,7 +36,29 @@ export default async function Page({ params }) {
         <Link className="text-link" href="/properties">
           {tr("← All properties")}
         </Link>
-        <Gallery images={p.images} title={p.title} />
+        <div className="listing-overview">
+          <Gallery images={p.images} title={p.title} />
+          <aside className="similar-listings">
+            <h2>{tr("Similar listings")}</h2>
+            {related.length ? (
+              related.map((x) => <PropertyCard property={x} key={x.id} />)
+            ) : (
+              <p>{tr("No similar listings yet.")}</p>
+            )}
+            <Link
+              className="text-link"
+              href={
+                "/properties?" +
+                new URLSearchParams({
+                  city: p.city,
+                  listing_type: p.listing_type,
+                })
+              }
+            >
+              {tr("← All properties")}
+            </Link>
+          </aside>
+        </div>
         <div className="detail-grid">
           <div>
             <span className="badge">
@@ -118,17 +147,19 @@ export default async function Page({ params }) {
                       <p>{tr("View realtor profile ↗")}</p>
                     </div>
                   </Link>
-                  {agent.phone && (
-                    <a
-                      className="button secondary"
-                      style={{ width: "100%", marginBottom: 25 }}
-                      href={"tel:" + agent.phone}
-                    >
-                      {tr("Call ")}
-                      {agent.phone}
-                    </a>
-                  )}
                 </>
+              )}
+              {telephone ? (
+                <a className="button call-button" href={telephone}>
+                  {tr("Call ")}
+                  <span dir="ltr">{contactPhone}</span>
+                </a>
+              ) : (
+                <p>
+                  {tr(
+                    "Phone not provided. Send an inquiry to contact the advertiser.",
+                  )}
+                </p>
               )}
               <InquiryForm propertyId={p.id} demo={!configured} />
               <SaveProperty id={p.id} />
@@ -136,22 +167,6 @@ export default async function Page({ params }) {
               <ReportProperty id={p.id} />
             </div>
           </aside>
-        </div>
-        <div className="section-heading" style={{ marginTop: 50 }}>
-          <h2>{tr("You might also like")}</h2>
-        </div>
-        <div className="property-grid">
-          {properties
-            .filter(
-              (x) =>
-                x.id !== p.id &&
-                x.city === p.city &&
-                x.listing_type === p.listing_type,
-            )
-            .slice(0, 3)
-            .map((x) => (
-              <PropertyCard property={x} key={x.id} />
-            ))}
         </div>
       </main>
     </>

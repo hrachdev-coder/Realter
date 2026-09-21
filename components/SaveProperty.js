@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useLocale } from "./LocaleProvider";
 import { useAuth } from "./AuthProvider";
@@ -9,10 +10,14 @@ export default function SaveProperty({ id }) {
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
   useEffect(() => {
+    setSaved(false);
     if (!user) return;
     let active = true;
     fetch("/api/saved")
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw Error();
+        return r.json();
+      })
       .then((d) => {
         if (active) setSaved(d.favoriteIds?.includes(id) || false);
       })
@@ -26,6 +31,8 @@ export default function SaveProperty({ id }) {
   return (
     <>
       <button
+        type="button"
+        aria-pressed={saved}
         className="button secondary"
         disabled={busy}
         onClick={async () => {
@@ -57,6 +64,14 @@ export default function SaveProperty({ id }) {
         {t(saved ? "Remove from favorites" : "Save to favorites")}
       </button>
       {message && <p role="status">{t(message)}</p>}
+      {message === "Please log in." && (
+        <Link
+          className="text-link"
+          href={"/login?next=" + encodeURIComponent("/properties/" + id)}
+        >
+          {t("Log in")}
+        </Link>
+      )}
     </>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useLocale } from "./LocaleProvider";
 export default function ReportProperty({ id }) {
@@ -9,7 +10,14 @@ export default function ReportProperty({ id }) {
     [busy, setBusy] = useState(false);
   return (
     <section>
-      <button onClick={() => setOpen(!open)}>{t("Report listing")}</button>
+      <button
+        type="button"
+        className="text-link report-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        {t("Report listing")}
+      </button>
       {open && (
         <form
           onSubmit={async (e) => {
@@ -46,6 +54,14 @@ export default function ReportProperty({ id }) {
             {t("Send report")}
           </button>
           <p role="status">{t(message)}</p>
+          {message === "Please log in." && (
+            <Link
+              className="text-link"
+              href={"/login?next=" + encodeURIComponent("/properties/" + id)}
+            >
+              {t("Log in")}
+            </Link>
+          )}
         </form>
       )}
     </section>
