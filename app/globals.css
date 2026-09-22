@@ -1786,3 +1786,26 @@ html[lang="hy"] .eyebrow {
 .similar-listings h3 {
   overflow-wrap: anywhere;
 }
+
+/* Keep navigation reachable on narrow screens and long translated headings readable. */
+.similar-listings h2 {
+  font-size: 24px;
+  line-height: 1.3;
+}
+@media (max-width: 600px) {
+  .header .register-link {
+    display: none;
+  }
+  .header-actions {
+    min-width: 0;
+  }
+  .menu-toggle {
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 400px) {
+  .header .login-link,
+  .header .account-link span {
+    display: none;
+  }
+}
