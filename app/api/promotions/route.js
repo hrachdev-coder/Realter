@@ -1,3 +1,4 @@
+import { promotionsEnabled } from "@/lib/features";
 import { supabase } from "@/lib/supabase/server";
 import { configured } from "@/lib/config";
 import { isSameOrigin } from "@/lib/request";
@@ -5,6 +6,7 @@ import { topPackage } from "@/lib/promotions";
 const reply = (body, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 export async function POST(request) {
+  if (!promotionsEnabled) return reply({ error: "Not found." }, 404);
   if (!isSameOrigin(request))
     return reply({ error: "Invalid request origin." }, 403);
   if (!configured) return reply({ error: "TOP is not connected yet." }, 503);
@@ -44,6 +46,7 @@ export async function POST(request) {
   return reply({ order: data });
 }
 export async function GET() {
+  if (!promotionsEnabled) return reply({ orders: [], available: false });
   if (!configured) return reply({ orders: [], available: false });
   const db = await supabase();
   const {

@@ -1,4 +1,5 @@
 "use client";
+import { promotionsEnabled } from "@/lib/features";
 import SaveSearch from "./SaveSearch";
 import { useLocale } from "@/components/LocaleProvider";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -211,7 +212,7 @@ export default function PropertySearch({
         </div>
       ) : (
         <div aria-busy={loading} style={{ opacity: loading ? 0.55 : 1 }}>
-          {!loading && result.sponsored?.length > 0 && (
+          {promotionsEnabled && !loading && result.sponsored?.length > 0 && (
             <section
               className="sponsored-section"
               aria-label={tr("Advertisement")}

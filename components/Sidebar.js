@@ -1,4 +1,5 @@
 "use client";
+import { promotionsEnabled } from "@/lib/features";
 import { useLocale } from "@/components/LocaleProvider";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,7 +28,9 @@ export default function Sidebar() {
         {[
           [LayoutDashboard, "Overview", ""],
           [House, "Properties", "/properties"],
-          [ArrowUpRight, "Promote TOP", "/promote"],
+          ...(promotionsEnabled
+            ? [[ArrowUpRight, "Promote TOP", "/promote"]]
+            : []),
           [Users, "Clients", "/clients"],
           [Inbox, "Leads", "/leads"],
           [CheckSquare, "Tasks", "/tasks"],

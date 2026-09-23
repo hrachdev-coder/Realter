@@ -1,4 +1,5 @@
 "use client";
+import { promotionsEnabled } from "@/lib/features";
 import { useLocale } from "@/components/LocaleProvider";
 import { useState } from "react";
 import Link from "next/link";
@@ -134,7 +135,7 @@ export default function CrmProperties() {
                     <Link href={"/dashboard/properties/" + p.id}>
                       {tr("Edit")}
                     </Link>
-                    {p.status === "published" && (
+                    {promotionsEnabled && p.status === "published" && (
                       <Link href={"/dashboard/promote?property=" + p.id}>
                         {tr("Promote TOP")}
                       </Link>
