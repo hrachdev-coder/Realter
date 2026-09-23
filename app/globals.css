@@ -1904,6 +1904,8 @@ html[lang="hy"] .eyebrow {
 }
 .gallery-prev,
 .gallery-next {
+  padding: 0;
+  float: none;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -1970,6 +1972,9 @@ html[lang="hy"] .eyebrow {
   border-radius: 5px;
 }
 .gallery-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(1100px, 96vw);
   max-width: 96vw;
   max-height: 94dvh;
