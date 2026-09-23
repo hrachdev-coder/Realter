@@ -2,7 +2,7 @@
 import { useLocale } from "@/components/LocaleProvider";
 
 import { rentSuffix } from "@/lib/property-options";
-import { imageUrl } from "@/lib/images";
+import CardPhotos from "./CardPhotos";
 import Link from "next/link";
 import { money } from "@/lib/i18n";
 import { BedDouble, Bath, Maximize, ArrowUpRight } from "lucide-react";
@@ -11,9 +11,9 @@ export default function PropertyCard({ property: p, sponsored = false }) {
   const { t: tr, locale } = useLocale();
 
   return (
-    <Link href={"/properties/" + p.id} className="property-card">
+    <article className="property-card">
       <div className="card-image">
-        <img src={imageUrl(p.images?.[0])} alt={p.title} loading="lazy" />
+        <CardPhotos property={p} />
         <span className="badge">
           {tr("For ")}
           {tr(p.listing_type)}
@@ -23,7 +23,7 @@ export default function PropertyCard({ property: p, sponsored = false }) {
           <ArrowUpRight size={19} />
         </span>
       </div>
-      <div className="card-body">
+      <Link href={"/properties/" + p.id} className="card-body">
         <div className="price">
           {tr(money(p, locale))}
           {p.listing_type === "rent" && <small>{tr(rentSuffix(p))}</small>}
@@ -49,7 +49,7 @@ export default function PropertyCard({ property: p, sponsored = false }) {
             {tr(" m²")}
           </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </article>
   );
 }

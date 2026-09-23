@@ -50,6 +50,7 @@ export default function PropertyEditor({ id }) {
       contact_phone: profile?.phone || "",
       ...existing,
     }),
+    [uploadProgress, setUploadProgress] = useState(null),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
   if (id && !existing)
@@ -120,6 +121,7 @@ export default function PropertyEditor({ id }) {
   }
   async function upload(e) {
     const selected = [...e.target.files];
+    if (busy || !selected.length) return;
     e.target.value = "";
     if (demo) {
       setMessage(
@@ -131,6 +133,19 @@ export default function PropertyEditor({ id }) {
       setMessage("Use at most 20 photos.");
       return;
     }
+    if (
+      selected.some(
+        (file) =>
+          !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+          file.size > 5 * 1024 * 1024 ||
+          file.size === 0,
+      )
+    ) {
+      setMessage("Use JPG, PNG, or WebP images under 5 MB.");
+      return;
+    }
+    setMessage("");
+    setUploadProgress({ done: 0, total: selected.length });
     const uploaded = [];
     setBusy(true);
     try {
@@ -153,6 +168,7 @@ export default function PropertyEditor({ id }) {
           .upload(path, file, { contentType: file.type, upsert: false });
         if (error) throw error;
         uploaded.push(path);
+        setUploadProgress({ done: uploaded.length, total: selected.length });
       }
       setValue((current) => ({
         ...current,
@@ -172,6 +188,7 @@ export default function PropertyEditor({ id }) {
             : ""),
       );
     } finally {
+      setUploadProgress(null);
       setBusy(false);
     }
   }
@@ -362,6 +379,23 @@ export default function PropertyEditor({ id }) {
           />
         </label>
         <h2>{tr("Photos")}</h2>
+        <p className="wide">
+          {tr(
+            "Select multiple photos at once. On a computer, hold Ctrl or Shift; on a phone, select several photos. Maximum 20 photos, 5 MB each.",
+          )}
+        </p>
+        {uploadProgress && (
+          <div className="notice wide" role="status" aria-live="polite">
+            {tr("Uploading photos")} {uploadProgress.done} /{" "}
+            {uploadProgress.total}
+            <progress
+              aria-label={tr("Uploading photos")}
+              value={uploadProgress.done}
+              max={uploadProgress.total}
+              style={{ display: "block", width: "100%", marginTop: 8 }}
+            />
+          </div>
+        )}
         <label className="wide">
           {tr("Upload property photos (JPG, PNG, WebP · up to 5 MB each)")}
           <input
@@ -390,6 +424,7 @@ export default function PropertyEditor({ id }) {
               />
               <button
                 type="button"
+                disabled={busy}
                 className="button secondary small"
                 onClick={() =>
                   update(
