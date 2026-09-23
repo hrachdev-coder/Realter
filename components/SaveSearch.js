@@ -12,6 +12,7 @@ export default function SaveSearch({ filters }) {
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
+        setMessage("");
         try {
           const r = await fetch("/api/saved", {
             method: "POST",
@@ -43,7 +44,11 @@ export default function SaveSearch({ filters }) {
       <button className="button secondary" disabled={busy}>
         {t("Save search")}
       </button>
-      {message && <p role="status">{t(message)}</p>}
+      {message && (
+        <p className="save-search-message" role="status">
+          {t(message)}
+        </p>
+      )}
     </form>
   );
 }
